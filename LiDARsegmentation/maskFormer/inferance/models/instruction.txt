@@ -1,0 +1,1 @@
+Semantic segegmentation models can can be put in this folder
