@@ -1,0 +1,13 @@
+other:255,255,255::
+Grass:64,255,38::
+CameraEdge:70,70,70::
+Vehicle:150,0,191::
+Person:255,38,38::
+Bush:232,227,81::
+Puddle:255,179,0::
+Building:255,20,20::
+Dirtroad:191,140,0::
+Sky:15,171,255::
+Large_stone:200,200,200::
+Forrest:46,153,0::
+Gravel:180,180,180::

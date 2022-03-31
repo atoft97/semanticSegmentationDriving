@@ -1,0 +1,9 @@
+*.png
+*.jpg
+*.jpeg
+*.pkl
+*.pth
+*.zip
+*.json
+*.bag
+*.pyc
