@@ -224,13 +224,13 @@ class Segmented2DirectionLocal:
     #for filename in tqdm(innputFilenames[2150:]):
     def getDirectionOfImage(self,indexImage, colorImage, fileName, rangeImage, rgb_img, drivableColor, useDepth, lat, long, heading): 
 
-        lat = 0
-        long = 0
+        #lat = 0
+        #long = 0
 
         print(lat)
         print(long)
 
-        heading =-45
+        #heading =-45
 
         self.counter += 1
         numpyImage = np.asarray(indexImage) # kanskje unødvendig vist den allerde e numpy
