@@ -23,7 +23,7 @@ class Segmented2DirectionLocal:
         self.goalLongitude = goalX
         self.typeOfImage = typeOfImage
         
-        self.mapImage = Image.open('driving/mapsMap.png', 'r')
+        #self.mapImage = Image.open('driving/mapsMap.png', 'r')
         self.BBox = ((11.4040, 11.4262, 61.1740, 61.1871))
 
         #if (typeOfImage == "lidar"):
@@ -320,6 +320,7 @@ class Segmented2DirectionLocal:
         if (self.loggingFolder != ""):
             
             fig, ax = plt.subplots(nrows=7, figsize = (15,10))
+            '''
             ax[0].scatter(self.goalLongitude ,self.goalLatitude, zorder=1, c='b', s=10)
             ax[0].scatter(longitude, latitude, zorder=1, c='b', s=10)
 
@@ -332,7 +333,7 @@ class Segmented2DirectionLocal:
             ax[0].annotate("", xy=(longitude, latitude), xytext=(x_coord_actual, y_coord_actual), arrowprops=dict(arrowstyle="<-", color='red'))
 
             ax[0].annotate("", xy=(longitude, latitude), xytext=(x_coord_best, y_coord_best), arrowprops=dict(arrowstyle="<-", color='green'))
-            
+            '''
 
             #colorFilePath = colorStartPath + "/" + fileName
             #colorImage = Image.open(colorFilePath)
@@ -371,8 +372,8 @@ class Segmented2DirectionLocal:
             rect = patches.Rectangle((bestBounderies[2], bestBounderies[0]), bestBounderies[3] -bestBounderies[2], bestBounderies[1] - bestBounderies[0], linewidth=1, edgecolor='r', facecolor='none')
             partImageDrivable = drivableColor
             partImageDrivable[rangeImage<100] = 0
-            ax[6].imshow(partImageDrivable, zorder=0, aspect= 'equal')
-            ax[6].add_patch(rect)
+            ax[0].imshow(partImageDrivable, zorder=0, aspect= 'equal')
+            ax[0].add_patch(rect)
 
             indexOutputPath = os.path.join(dirname, f'mapPlot10/{fileName}')
             plt.savefig(indexOutputPath)

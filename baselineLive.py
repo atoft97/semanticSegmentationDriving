@@ -451,7 +451,7 @@ if __name__ == '__main__':
     if (typeOfBasline == "rgb"):
         node = BaselineLive("semanticRGB", useDepth=False, modelType=typeOfBasline, goalX=goalX, goalY=goalY) 
     elif (typeOfBasline == "lidar"):
-        node = BaselineLive("modelAltTilNo", useDepth=True, modelType=typeOfBasline,  goalX=goalX, goalY=goalY)
+        node = BaselineLive("semanticLiDAR", useDepth=True, modelType=typeOfBasline,  goalX=goalX, goalY=goalY)
 
     while not rospy.is_shutdown():
         rospy.spin()
