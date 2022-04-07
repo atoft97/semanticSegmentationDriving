@@ -16,10 +16,11 @@ dirname = os.path.dirname(__file__)
 
 class Segmented2DirectionLocal:
 
-    def __init__(self, typeOfImage, csvPath, loggingFolder, goalLatitude =  100, goalLongitude =  -200):
+    def __init__(self, typeOfImage, csvPath, loggingFolder, goalX, goalY):
+        print(goalX, goalY)
         self.loggingFolder = loggingFolder
-        self.goalLatitude =  goalLatitude
-        self.goalLongitude = goalLongitude
+        self.goalLatitude =  goalY
+        self.goalLongitude = goalX
         self.typeOfImage = typeOfImage
         
         self.mapImage = Image.open('driving/mapsMap.png', 'r')
@@ -131,15 +132,25 @@ class Segmented2DirectionLocal:
 
             score = self.getAreaScore(hightStart, hightStop, widthStart, widthStop, image, rangeImage, useDepth)
 
+            #print("change før",directionChange)
+            if (directionChange>180):
+                directionChange = directionChange - 360
+            elif (directionChange< -180):
+                directionChange = directionChange % 360
+            #directionChange = directionChange % 360
             offsetDegrees = abs(directionChange-degreesCamera)
 
-            #print("change",directionChange)
+
+
+            scaledScore = score - offsetDegrees*10
+
+            #print("change etter",directionChange)
             #print("camera",degreesCamera)
 
             #print("offcet", offsetDegrees)
+            #print("score", scaledScore
+            #)
             #print("\n")
-
-            scaledScore = score - offsetDegrees*10
             
 
 
@@ -199,11 +210,11 @@ class Segmented2DirectionLocal:
         countDict[4] = len(partImage[partImage == 4])
 
         score = 0
-        #score += countDict[4] * (-10000) #obsticle
-        #score += countDict[3] * (-10) #verry bad terrain 
-        #score += countDict[2] * (-1) #rough terrain
-        #score += countDict[1] * (1) #good terrain
-        #score += countDict[0] * (0) #unknown
+        score += countDict[4] * (-10000) #obsticle
+        score += countDict[3] * (-10) #verry bad terrain 
+        score += countDict[2] * (-1) #rough terrain
+        score += countDict[1] * (1) #good terrain
+        score += countDict[0] * (0) #unknown
 
         #print("score", score)
         return(score/1000)
@@ -213,13 +224,13 @@ class Segmented2DirectionLocal:
     #for filename in tqdm(innputFilenames[2150:]):
     def getDirectionOfImage(self,indexImage, colorImage, fileName, rangeImage, rgb_img, drivableColor, useDepth, lat, long, heading): 
 
-        #lat = 100
-        #long = 100
+        lat = 0
+        long = 0
 
         print(lat)
         print(long)
 
-        #heading =359
+        heading =-45
 
         self.counter += 1
         numpyImage = np.asarray(indexImage) # kanskje unødvendig vist den allerde e numpy
@@ -301,6 +312,7 @@ class Segmented2DirectionLocal:
             ax[2].imshow(rgb_img, zorder=0, aspect= 'equal')
             ax[2].add_patch(rect)
         
+        print("lagret bilde")
         indexOutputPath = os.path.join(dirname, f'mapPlot11/{self.counter}')
         plt.savefig(indexOutputPath)
         plt.close()

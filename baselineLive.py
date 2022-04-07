@@ -1,3 +1,4 @@
+from tkinter.messagebox import NO
 from LiDARsegmentation.maskFormer.inferance.inferance import Inferance
 from tqdm import tqdm
 from os import listdir
@@ -20,16 +21,17 @@ from tf.transformations import euler_from_quaternion
 import math
 
 from ouster import client
+import sys
 
 class BaselineLive:
 
-    def __init__(self, modelName, useDepth=False):
+    def __init__(self, modelName, useDepth, modelType,  goalX, goalY):
         print("initializing")
         self.inferance = Inferance(loggingFolder="", modelName=modelName)
         self.classToDrivable = ClassesToDrivable()
         #self.segmented2Direction = Segmented2Direction("rgb", csvPath="outputDataset/rgbDriving.csv", loggingFolder="")
         #self.segmented2Direction = Segmented2DirectionLocal("rgb", csvPath="outputDataset/rgbDriving.csv", loggingFolder="")
-        self.segmented2Direction = Segmented2DirectionLocal("lidar", csvPath="outputDataset/rgbDriving.csv", loggingFolder="")
+        self.segmented2Direction = Segmented2DirectionLocal(modelType, csvPath="outputDataset/rgbDriving.csv", loggingFolder="", goalX=goalX, goalY=goalY)
 
         
         #self.esimateDepth = EsimateDepth()
@@ -51,11 +53,13 @@ class BaselineLive:
         
         stortTall = 2**32
         print("stor", stortTall)
-        self.sub_rgb = rospy.Subscriber("/ugv_sensors/camera/color/image", Image, self.processRGBImage,queue_size=1, buff_size=stortTall)
 
-        self.sub_range = rospy.Subscriber("/ugv_sensors/lidar/image/range_image", Image, self.processRange,queue_size=1, buff_size=stortTall)
-        self.sub_signal = rospy.Subscriber("/ugv_sensors/lidar/image/signal_image", Image, self.processSignal,queue_size=1, buff_size=stortTall)
-        self.sub_reflec = rospy.Subscriber("/ugv_sensors/lidar/image/reflec_image", Image, self.processReflec,queue_size=1, buff_size=stortTall)
+        if (modelType=="rgb"):
+            self.sub_rgb = rospy.Subscriber("/ugv_sensors/camera/color/image", Image, self.processRGBImage,queue_size=1, buff_size=stortTall)
+        elif (modelType=="lidar"):
+            self.sub_range = rospy.Subscriber("/ugv_sensors/lidar/image/range_image", Image, self.processRange,queue_size=1, buff_size=stortTall)
+            self.sub_signal = rospy.Subscriber("/ugv_sensors/lidar/image/signal_image", Image, self.processSignal,queue_size=1, buff_size=stortTall)
+            self.sub_reflec = rospy.Subscriber("/ugv_sensors/lidar/image/reflec_image", Image, self.processReflec,queue_size=1, buff_size=stortTall)
 
         #self.sub_lidar = rospy.Subscriber("/ugv_sensors/lidar/cloud/points", PointCloud2, self.processLidar,queue_size=1, buff_size=stortTall)
         #self.sub_pos = rospy.Subscriber("/ugv_sensors/navp_ros/nav_sat_fix", NavSatFix, self.processPOS,queue_size=1)
@@ -70,8 +74,12 @@ class BaselineLive:
 
         #self.freq = rospy.get_param("~freq", 5.)
         #print("freq", self.freq)
+        if (modelType=="rgb"):
+            self.timer = rospy.Timer(rospy.Duration(1./10), self.timerFunction)
+        elif (modelType=="lidar"):
+            self.timerLidar = rospy.Timer(rospy.Duration(1./10), self.timerLidar)
         #self.timer = rospy.Timer(rospy.Duration(1./10), self.timerFunction)
-        self.timerLidar = rospy.Timer(rospy.Duration(1./10), self.timerLidar)
+        
         #print(self.timer)
 
         #metadata_path = "lidar_metadata.json"
@@ -253,8 +261,8 @@ class BaselineLive:
             rangeImageBright = cv2.bitwise_not(rangeImageBright)
             
             #print(type(image))
-            #print(rangeImage.shape)
-            #print(rangeImage)
+            print(rangeImage.shape)
+            print(rangeImage)
             combined = cv2.merge((signalImage, reflecImage, rangeImageBright))
             cv2.imwrite("testCombined.png", combined)
 
@@ -432,11 +440,18 @@ class BaselineLive:
 
 
 if __name__ == '__main__':
+
+    typeOfBasline = sys.argv[1]
+    goalX = int(sys.argv[2])
+    goalY = int(sys.argv[3])
+    print(typeOfBasline)
     
     rospy.init_node('baselineLive')
 
-    #node = BaselineLive("semanticRGB", useDepth=False)
-    node = BaselineLive("modelAltTilNo", useDepth=False)
+    if (typeOfBasline == "rgb"):
+        node = BaselineLive("semanticRGB", useDepth=False, modelType=typeOfBasline, goalX=goalX, goalY=goalY) 
+    elif (typeOfBasline == "lidar"):
+        node = BaselineLive("modelAltTilNo", useDepth=True, modelType=typeOfBasline,  goalX=goalX, goalY=goalY)
 
     while not rospy.is_shutdown():
         rospy.spin()
