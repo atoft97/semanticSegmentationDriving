@@ -20,8 +20,10 @@ import numpy as np
 from tf.transformations import euler_from_quaternion
 import math
 
-from ouster import client
+#from ouster import client
 import sys
+
+#from PIL import Image
 
 class BaselineLive:
 
@@ -52,7 +54,7 @@ class BaselineLive:
         #self.sub_cloud = rospy.Subscriber("/ugv_sensors/lidar/cloud/points", PointCloud2, self.processLidarImage,queue_size=1) #konverter sjølv med ouster eller ta inn 4 topics (/ugv_sensors/lidar/image/range_image)
         
         stortTall = 2**32
-        print("stor", stortTall)
+        #print("stor", stortTall)
 
         if (modelType=="rgb"):
             self.sub_rgb = rospy.Subscriber("/ugv_sensors/camera/color/image", Image, self.processRGBImage,queue_size=1, buff_size=stortTall)
@@ -69,7 +71,7 @@ class BaselineLive:
         #self.sub_heading = rospy.Subscriber("/ugv_sensors/navp_ros/navp_msg", Odometry, self.processHeading,queue_size=1)
         self.bridge = CvBridge()
 
-        self.pub_twist = rospy.Publisher("~speedAndDirection", Twist, queue_size = 1)
+        self.pub_twist = rospy.Publisher("~cmd_vel", Twist, queue_size = 1)
         self.pub_segmented_image = rospy.Publisher("~segmentedImage", Image, queue_size = 1)
 
         #self.freq = rospy.get_param("~freq", 5.)
@@ -97,6 +99,7 @@ class BaselineLive:
     #def processLidar(self, rosPointcloud):
 
     def processRange(self, rosImage):
+        #print("new range")
         self.latest_range = rosImage
     
     def processSignal(self, rosImage):
@@ -130,7 +133,7 @@ class BaselineLive:
         
     def processHeading(self, data):
         #print(type(data))
-        print(data)
+        #print(data)
         #print(dir(data))
         #connection_header = data._connection_header['type'].split('/')
         #ros_pkg = connection_header[0] + '.msg'
@@ -195,13 +198,12 @@ class BaselineLive:
 
             #send twist            
             twist = Twist()
-            twist.linear = 5 #constant low speed for testing
-            twist.angular = recomendedDirection
-
+            twist.linear.x = 1 #constant low speed for testing
+            twist.angular.z = math.radians(recomendedDirection) # mabye change to negative for counter clockwise
             self.pub_twist.publish(twist)
 
-            #outputImage = Image()
-            #self.pub_segmented_image.publish(rgb_img)
+            rgb_img = rgb_img.astype('uint8')
+            self.pub_segmented_image.publish(self.bridge.cv2_to_imgmsg(rgb_img))
 
             #self.ready = True
 
@@ -261,8 +263,8 @@ class BaselineLive:
             rangeImageBright = cv2.bitwise_not(rangeImageBright)
             
             #print(type(image))
-            print(rangeImage.shape)
-            print(rangeImage)
+            #print(rangeImage.shape)
+            #print(rangeImage)
             combined = cv2.merge((signalImage, reflecImage, rangeImageBright))
             cv2.imwrite("testCombined.png", combined)
 
@@ -289,10 +291,14 @@ class BaselineLive:
 
             #send twist            
             twist = Twist()
-            twist.linear = 5 #constant low speed for testing
-            twist.angular = recomendedDirection
-
+            twist.linear.x = 1 #constant low speed for testing
+            twist.angular.z = math.radians(recomendedDirection) # mabye change to negative for counter clockwise
             self.pub_twist.publish(twist)
+
+            #outputImage = Image()
+            rgb_img = rgb_img.astype('uint8')
+            self.pub_segmented_image.publish(self.bridge.cv2_to_imgmsg(rgb_img))
+            
 
             #outputImage = Image()
             #self.pub_segmented_image.publish(rgb_img)

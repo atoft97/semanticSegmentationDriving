@@ -227,8 +227,8 @@ class Segmented2DirectionLocal:
         #lat = 0
         #long = 0
 
-        print(lat)
-        print(long)
+        #print(lat)
+        #print(long)
 
         #heading =-45
 
@@ -312,7 +312,7 @@ class Segmented2DirectionLocal:
             ax[2].imshow(rgb_img, zorder=0, aspect= 'equal')
             ax[2].add_patch(rect)
         
-        print("lagret bilde")
+        #print("lagret bilde")
         indexOutputPath = os.path.join(dirname, f'mapPlot11/{self.counter}')
         plt.savefig(indexOutputPath)
         plt.close()
@@ -386,7 +386,7 @@ class Segmented2DirectionLocal:
 
 
         #print(bestBounderies)
-        print("faktisk:", direction)
+        #print("faktisk:", direction)
         #print("anbefalt:", strightDirection)
         #print("change:", directionChange)
         #print("bestDegree local:", bestDegreeLocal)
