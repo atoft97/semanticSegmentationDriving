@@ -321,6 +321,9 @@ class Segmented2DirectionLocal:
         #print("lagret bilde")
         indexOutputPath = os.path.join(dirname, f'mapPlot12/{self.counter}')
         plt.savefig(indexOutputPath)
+
+        indexOutputPath = os.path.join(dirname, f'mapPlot13/imageOutput')
+        plt.savefig(indexOutputPath)
         plt.close()
 
         if (self.loggingFolder != ""):

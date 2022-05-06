@@ -329,7 +329,7 @@ class BaselineLive:
 
             rgb_img = rgb_img.astype('uint8')
             print("publisert bilde")
-            self.pub_segmented_image.publish(self.bridge.cv2_to_imgmsg(rgb_img))
+            #self.pub_segmented_image.publish(self.bridge.cv2_to_imgmsg(rgb_img))
 
 
             
@@ -652,7 +652,7 @@ class BaselineLive:
             rosPontCloud = pc2.create_cloud(header, fields, cloud_data)
             '''
             rosPontCloud = self.o3dpc_to_rospc(pcd, rosPointCLoud.header)
-            self.pub_segmented_pointcloud.publish(rosPontCloud)
+            #self.pub_segmented_pointcloud.publish(rosPontCloud)
             #o3d.visualization.draw_geometries([pcd])
 
             #outputImage = Image()
@@ -873,7 +873,7 @@ class BaselineLive:
             #print(rangeImage)
             #combined = cv2.merge((signalImage, reflecImage, rangeImageBright))
             
-            cv2.imwrite("testCombined.png", combined)
+            #cv2.imwrite("testCombined.png", combined)
 
             width = combined.shape[1] # keep original width
             height = 64*4
@@ -882,7 +882,7 @@ class BaselineLive:
 
             
             vis_panoptic, rgb_img, classImage = self.inferance.segmentImage(combinedTaller, fileName)
-            cv2.imwrite("testLidar.png", rgb_img)
+            #cv2.imwrite("testLidar.png", rgb_img)
             
             #if (useDepth):
             #    depthImage = self.esimateDepth.midasPredict(image) #add stero vision
@@ -915,7 +915,8 @@ class BaselineLive:
 
             #outputImage = Image()
             rgb_img = rgb_img.astype('uint8')
-            self.pub_segmented_image.publish(self.bridge.cv2_to_imgmsg(rgb_img))
+            
+            #self.pub_segmented_image.publish(self.bridge.cv2_to_imgmsg(rgb_img))
             
 
             #outputImage = Image()
