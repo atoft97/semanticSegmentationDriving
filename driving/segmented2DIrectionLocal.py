@@ -284,8 +284,8 @@ class Segmented2DirectionLocal:
         ax[0].scatter(self.goalLongitude ,self.goalLatitude, zorder=1, c='b', s=10)
         ax[0].scatter(longitude, latitude, zorder=1, c='b', s=10)
 
-        ax[0].set_xlim(-400,400)
-        ax[0].set_ylim(-400,400)
+        ax[0].set_xlim(-500,500)
+        ax[0].set_ylim(-500,500)
 
         #print(x_coord, y_coord)
         #print(longitude, latitude)
@@ -303,6 +303,12 @@ class Segmented2DirectionLocal:
         ax[1].imshow(rgb_img, zorder=0, aspect= 'equal')
         ax[1].add_patch(rect)
 
+        #colorImage = cv2.cvtColor(colorImage, cv2.COLOR_BGR2RGB)
+        #colorNumpyImage = np.asarray(colorImage)
+        #ax[2].imshow(colorNumpyImage, zorder=0, aspect= 'equal')
+        #rect = patches.Rectangle((bestBounderies[2], bestBounderies[0]), bestBounderies[3] -bestBounderies[2], bestBounderies[1] - bestBounderies[0], linewidth=1, edgecolor='r', facecolor='none')
+        #ax[2].add_patch(rect)
+
 
 
         if (useDepth):
@@ -313,7 +319,7 @@ class Segmented2DirectionLocal:
             ax[2].add_patch(rect)
         
         #print("lagret bilde")
-        indexOutputPath = os.path.join(dirname, f'mapPlot11/{self.counter}')
+        indexOutputPath = os.path.join(dirname, f'mapPlot12/{self.counter}')
         plt.savefig(indexOutputPath)
         plt.close()
 

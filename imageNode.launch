@@ -1,0 +1,8 @@
+<launch>
+
+
+
+  <node pkg="ouster_ros" name="img_node" type="img_node" output="screen" required="true">
+  </node>
+
+</launch>

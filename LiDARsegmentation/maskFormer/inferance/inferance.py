@@ -1,4 +1,5 @@
 import argparse
+from ast import In
 import glob
 import multiprocessing as mp
 import numpy as np
@@ -66,6 +67,7 @@ class Inferance:
         self.totalTime = 0
 
         self.lable_to_color = self.createLabelColorDict()
+        print("label to color", self.lable_to_color)
 
         if (loggingFolder != ""):
             self.coco = self.initOutputCocoDataset()
@@ -291,4 +293,5 @@ class Inferance:
 
 
         return(vis_panoptic, rgb_img, classImage)
+
 
