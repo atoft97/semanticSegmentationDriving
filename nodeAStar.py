@@ -107,13 +107,24 @@ class NodeAStar:
 
 
     def findBestPath(self, rosImage): #kan kjorast raskare enn kvart bilde for den for ny pos
-        imageMapPosX = self.latest_xpos + 500
-        imageMapPosY = self.latest_ypos + 500
+        if (self.latest_xpos == None):
+            return
+
+        imageMapPosX = int(self.latest_xpos + 500)
+        imageMapPosY = int(self.latest_ypos + 500)
+
+        
 
         self.counter += 1
         image = np.array(self.bridge.imgmsg_to_cv2(rosImage))[...,::-1]
         cv2.imwrite("astar.png", image)
 
+        #image_around_veichle = image[imageMapPosX-10:imageMapPosX+10, imageMapPosY-10:imageMapPosY+10]
+        #image_around_veichle_large = np.zeros((1000,1000, 3))
+
+
+
+        #cv2.imwrite("SmallAstar.png", image_around_veichle[...,::-1])
         #for i in range(-1,2):
         #    for j in range(-1,2):
         #        image[int(self.latest_xpos)+500+i, int(self.latest_ypos)+500+j] = (0,0,0)
@@ -155,15 +166,16 @@ class NodeAStar:
         cv2.imwrite("drivable.png", drivableMap)
         print("node a star recived new map", self.counter)
         #konverter til drivable
-        bestPath = self.astar(drivableMap, (int(self.latest_ypos)+500, int(self.latest_xpos)+500), (int(self.goalY)+500, int(self.goalX)+500)) #start in goal, switch
-        print("funnet best path", self.counter, bestPath)
+        
+        #bestPath = self.astar(drivableMap, (int(self.latest_ypos)+500, int(self.latest_xpos)+500), (int(self.goalY)+500, int(self.goalX)+500)) #start in goal, switch
+        #print("funnet best path", self.counter, bestPath)
         cv2.imwrite(f"astar2/{self.counter}withoutPath.png", image[...,::-1])
-        for node in bestPath:
-            pos = node.pos
+        #for node in bestPath:
+        #    pos = node.pos
             #print(drivableMap[pos[1], pos[0]])
-            image[pos[1], pos[0]] = (0,0,0)
-        print("plotted best path", self.counter, bestPath)
-        cv2.imwrite(f"astar2/{self.counter}withPath.png", image[...,::-1])
+        #    image[pos[1], pos[0]] = (0,0,0)
+        #print("plotted best path", self.counter, bestPath)
+        #cv2.imwrite(f"astar2/{self.counter}withPath.png", image[...,::-1])
         ax.imshow(image, zorder=0, aspect= 'equal')
         indexOutputPath =  f'astar/{self.counter}'
         plt.savefig(indexOutputPath)

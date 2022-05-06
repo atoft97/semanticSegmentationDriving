@@ -78,6 +78,7 @@ class BaselineLive:
 
         self.latest_rosOdom = None
         self.lindarSyncedOdom = None
+        self.pythonLidarTransform = False
 
         self.combinedMostLikely = np.zeros((1000, 1000))
 
@@ -96,14 +97,14 @@ class BaselineLive:
         if (modelType=="rgb"):
             self.sub_rgb = rospy.Subscriber("/ugv_sensors/camera/color/image", Image, self.processRGBImage,queue_size=1, buff_size=stortTall)
         elif (modelType=="lidar"):
-            #self.sub_range = rospy.Subscriber("/ugv_sensors/lidar/image/range_image", Image, self.processRange,queue_size=1, buff_size=stortTall)
-            #self.sub_signal = rospy.Subscriber("/ugv_sensors/lidar/image/signal_image", Image, self.processSignal,queue_size=1, buff_size=stortTall)
-            #self.sub_reflec = rospy.Subscriber("/ugv_sensors/lidar/image/reflec_image", Image, self.processReflec,queue_size=1, buff_size=stortTall)
-            #self.sub_lidar = rospy.Subscriber("/ugv_sensors/lidar/cloud/points", PointCloud2, self.processLidar,queue_size=1, buff_size=stortTall)
-            self.sub_range = rospy.Subscriber("/custom/rangeImage", Image, self.processRange,queue_size=1, buff_size=stortTall)
-            self.sub_signal = rospy.Subscriber("/custom/signalImage", Image, self.processSignal,queue_size=1, buff_size=stortTall)
-            self.sub_reflec = rospy.Subscriber("/custom/reflectImage", Image, self.processReflec,queue_size=1, buff_size=stortTall)
-            self.sub_lidar = rospy.Subscriber("/custom/Pointcloud", PointCloud2, self.processLidar,queue_size=1, buff_size=stortTall)
+            self.sub_range = rospy.Subscriber("/ugv_sensors/lidar/image/range_image", Image, self.processRange,queue_size=1, buff_size=stortTall)
+            self.sub_signal = rospy.Subscriber("/ugv_sensors/lidar/image/signal_image", Image, self.processSignal,queue_size=1, buff_size=stortTall)
+            self.sub_reflec = rospy.Subscriber("/ugv_sensors/lidar/image/reflec_image", Image, self.processReflec,queue_size=1, buff_size=stortTall)
+            self.sub_lidar = rospy.Subscriber("/ugv_sensors/lidar/cloud/points", PointCloud2, self.processLidar,queue_size=1, buff_size=stortTall)
+            #self.sub_range = rospy.Subscriber("/custom/rangeImage", Image, self.processRange,queue_size=1, buff_size=stortTall)
+            #self.sub_signal = rospy.Subscriber("/custom/signalImage", Image, self.processSignal,queue_size=1, buff_size=stortTall)
+            #self.sub_reflec = rospy.Subscriber("/custom/reflectImage", Image, self.processReflec,queue_size=1, buff_size=stortTall)
+            #self.sub_lidar = rospy.Subscriber("/custom/Pointcloud", PointCloud2, self.processLidar,queue_size=1, buff_size=stortTall)
             
             #self.sub_lidar_imu = rospy.Subscriber("/ugv_sensors/lidar/cloud/imu", Imu, self.processLidarImu,queue_size=1, buff_size=stortTall)
             
@@ -279,7 +280,7 @@ class BaselineLive:
 
     
     def timeLidarPointCloud(self, event=None):
-        print("time lidar")
+        #print("time lidar")
         
         rosReflec = copy.copy(self.latest_reflec)
         rosRange = copy.copy(self.latest_range)
@@ -321,26 +322,37 @@ class BaselineLive:
             useDepth = False
 
             #print(rosRange)
-            rangeImage = self.bridge.imgmsg_to_cv2(rosRange)
-            reflecImage = self.bridge.imgmsg_to_cv2(rosReflec)
-            signalImage = self.bridge.imgmsg_to_cv2(rosSignal)
+            if (self.pythonLidarTransform):
+                rangeImage = self.bridge.imgmsg_to_cv2(rosRange)
+                reflecImage = self.bridge.imgmsg_to_cv2(rosReflec)
+                signalImage = self.bridge.imgmsg_to_cv2(rosSignal)
 
-            #rangeImage = cv2.cvtColor(rangeImage, cv2.COLOR_BGR2GRAY)
-            #reflecImage = cv2.cvtColor(reflecImage, cv2.COLOR_BGR2GRAY)
-            #signalImage = cv2.cvtColor(signalImage, cv2.COLOR_BGR2GRAY)
-            reflecImageBright = cv2.multiply(reflecImage, 3)
-            signalImageBright = cv2.multiply(signalImage, 3)
-            rangeImageBright = cv2.multiply(rangeImage, 5) #multply by 15
-            #print("for", rangeImageBright)
-            rangeImageBright[rangeImageBright <= 1] = 255 #caps at 255
-            rangeImageBright = cv2.bitwise_not(rangeImageBright)
-            
-            combined = cv2.merge((signalImageBright, reflecImageBright, rangeImageBright))
-            cv2.imwrite("testCombined.png", combined)
+                reflecImageBright = cv2.multiply(reflecImage, 3)
+                signalImageBright = cv2.multiply(signalImage, 3)
+                rangeImageBright = cv2.multiply(rangeImage, 5) #multply by 15
 
-            cv2.imwrite("testRange.png", rangeImageBright)
-            cv2.imwrite("testRefelc.png", reflecImageBright)
-            cv2.imwrite("testSignal.png", signalImageBright)
+                rangeImageBright[rangeImageBright <= 5] = 255 #caps at 255
+                rangeImageBright = cv2.bitwise_not(rangeImageBright)
+                combined = cv2.merge((signalImageBright, reflecImageBright, rangeImageBright))
+            else:
+                rangeImage = self.bridge.imgmsg_to_cv2(rosRange, desired_encoding="bgr8")
+                reflecImage = self.bridge.imgmsg_to_cv2(rosReflec, desired_encoding="bgr8")
+                signalImage = self.bridge.imgmsg_to_cv2(rosSignal, desired_encoding="bgr8")
+
+                rangeImage = cv2.cvtColor(rangeImage, cv2.COLOR_BGR2GRAY)
+                reflecImage = cv2.cvtColor(reflecImage, cv2.COLOR_BGR2GRAY)
+                signalImage = cv2.cvtColor(signalImage, cv2.COLOR_BGR2GRAY)
+
+                rangeImageBright = cv2.multiply(rangeImage, 15) #multply by 15
+                rangeImageBright[rangeImageBright <= 0] = 255 #caps at 255
+                rangeImageBright = cv2.bitwise_not(rangeImageBright)
+                combined = cv2.merge((signalImage, reflecImage, rangeImageBright))
+
+            #cv2.imwrite("testCombined.png", combined)
+
+            #cv2.imwrite("testRange.png", rangeImageBright)
+            #cv2.imwrite("testRefelc.png", reflecImageBright)
+            #cv2.imwrite("testSignal.png", signalImageBright)
 
             width = combined.shape[1] # keep original width
             height = 64*4
@@ -475,6 +487,7 @@ class BaselineLive:
             print(pointsWithCoordiantes.shape)
             print("punkt start")
 
+            #self.numpyMap = np.zeros((15, 1000, 1000))
             numpyMapMovable = np.zeros((15, 1000, 1000))
             for i in range(pointsWithCoordiantes.shape[0]):
                 try:
@@ -526,15 +539,24 @@ class BaselineLive:
 
             rgb_img_most_likely = cv2.cvtColor(rgb_img_most_likely.astype('float32'), cv2.COLOR_BGR2RGB)
             print(rgb_img_most_likely)
-            cv2.imwrite("mostLikely.png", rgb_img_most_likely)
+            
             rgb_img_most_likely = rgb_img_most_likely.astype('uint8')
+            cv2.imwrite("mostLikely.png", rgb_img_most_likely)
+            #rgb_img_most_likely_around_veichle = rgb_img_most_likely[int(rosX+500)-10:int(rosX+500)+10, int(rosY+500)-10:int(rosY+500)+10]
+            #rgb_img_most_likely_around_veichle = copy.deepcopy(rgb_img_most_likely)
+            #rgb_img_most_likely_around_veichle[0:int(rosX+500)-10] = (255,255,255)
+            #rgb_img_most_likely_around_veichle[int(rosX+500)+10, 999] = (255,255,255)
+            #rgb_img_most_likely_around_veichle[0:int(rosY+500)-10] = (255,255,255)
+            #rgb_img_most_likely_around_veichle[int(rosY+500)+10, 999] = (255,255,255)
+            #rgb_img_most_likely_around_veichle = rgb_img_most_likely[int(rosX+500)-10:int(rosX+500)+10, int(rosY+500)-10:int(rosY+500)+10]
+            #cv2.imwrite("mostLikelyRoundVeicle.png", rgb_img_most_likely_around_veichle)
             self.pub_map_image.publish(self.bridge.cv2_to_imgmsg(rgb_img_most_likely))
 
             #send twist            
-            twist = Twist()
-            twist.linear.x = 1 #constant low speed for testing
-            twist.angular.z = -math.radians(recomendedDirection) # mabye change to negative for counter clockwise
-            self.pub_twist.publish(twist)
+            #twist = Twist()
+            #twist.linear.x = 1 #constant low speed for testing
+            #twist.angular.z = -math.radians(recomendedDirection) # mabye change to negative for counter clockwise
+            #self.pub_twist.publish(twist)
 
             #outputImage = Image()
             rgb_img = rgb_img.astype('uint8')
