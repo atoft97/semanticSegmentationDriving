@@ -395,11 +395,11 @@ class Segmented2DirectionLocal:
 
 
         #print(bestBounderies)
-        #print("faktisk:", direction)
-        #print("anbefalt:", strightDirection)
-        #print("change:", directionChange)
-        #print("bestDegree local:", bestDegreeLocal)
-        #print("bestDegree:", bestDegree)
+        print("faktisk:", direction)
+        print("anbefalt:", strightDirection)
+        print("change:", directionChange)
+        print("bestDegree local:", bestDegreeLocal)
+        print("bestDegree:", bestDegree)
         #print("\n")
 
 
@@ -408,7 +408,7 @@ class Segmented2DirectionLocal:
         #del colorImage
         #gc.collect()
         
-        return(bestDegreeLocal)
+        return(bestDegreeLocal, bestDegree)
 
         #if (counter == 1):
         #    break

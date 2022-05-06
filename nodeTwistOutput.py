@@ -51,28 +51,76 @@ class NodeTwistOutput:
         print("initializing NodeTwistOutput")
         #self.pub_twist = rospy.Publisher("~cmd_vel", Twist, queue_size = 1)
         self.sub_lidarSections = rospy.Subscriber("/custum/outputDirection", Twist, self.processTwist ,queue_size=1, buff_size=2*30)
+        self.sub_pos_heading = rospy.Subscriber("/warpath/navigation/odometry_integrated_center_enu", Odometry, self.processHeadingAndPos,queue_size=1)
         self.timerLidar = rospy.Timer(rospy.Duration(1./100), self.publishTwist)
         self.pub_twist= rospy.Publisher("/twistOut", Twist, queue_size = 5)
         self.newsetTwist = None
+        self.globalDegrees  = None
+        self.counter = 0
         print("initialized NodeTwistOutput")
+
+    def processHeadingAndPos(self, rosOdom):
+        self.latest_rosOdom = rosOdom
 
 
     def processTwist(self, inputTwist):
         self.newsetTwist = inputTwist
 
-        degrees = math.degrees(self.newsetTwist.angular.z)
+        self.globalDegrees =  math.degrees(self.newsetTwist.angular.z)
 
-        if (abs(degrees) > 20):
-            self.newsetTwist.linear.x = 0
-        else:
-            self.newsetTwist.angular.z = self.newsetTwist.angular.z * 2
+        #degrees = math.degrees(self.newsetTwist.angular.z)
+
+        #if (abs(degrees) > 20):
+        #    self.newsetTwist.linear.x = 0
+        #else:
+        #    self.newsetTwist.angular.z = self.newsetTwist.angular.z * 2
         
-        print(self.newsetTwist)
+        #print(self.newsetTwist)
     
     def publishTwist(self, event=None):
-        if (self.newsetTwist == None):
+        if (self.globalDegrees == None or self.latest_rosOdom == None):
             return
-        self.pub_twist.publish(self.newsetTwist)
+
+        odom = self.latest_rosOdom
+
+        rosY = odom.pose.pose.position.y
+        rosX = odom.pose.pose.position.x
+        rosZ = odom.pose.pose.position.z
+
+        rosRotationX = odom.pose.pose.orientation.x
+        rosRotationY = odom.pose.pose.orientation.y
+        rosRotationZ = odom.pose.pose.orientation.z
+        rosRotationW = odom.pose.pose.orientation.w
+
+        eulerOdom = euler_from_quaternion((rosRotationX, rosRotationY, rosRotationZ, rosRotationW))
+        xrotationEtter = -math.degrees(eulerOdom[2])+180
+        #print(rosX, rosY, xrotationEtter)
+
+        direction = xrotationEtter % 360
+        goalDirection = self.globalDegrees % 360
+
+        directionChange = (goalDirection - direction)
+
+        twist = Twist()
+        #twist.linear.x = 1 #constant low speed for testing
+        #twist.angular.z = -math.radians(recomendedDirection)
+        #twist.angular.z = math.radians(globalDirection)
+            # mabye change to negative for counter clockwise
+        
+        twist.angular.z = -math.radians(directionChange)
+
+        if (abs(directionChange) > 20):
+            twist.linear.x = 0
+        else:
+            twist.linear.x = 1
+            
+        
+        self.counter += 1
+        if (self.counter % 100 == 0):
+            print("twistern",directionChange)
+            print("twistern",twist)
+
+        self.pub_twist.publish(twist)
 
 
 
