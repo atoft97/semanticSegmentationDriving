@@ -318,13 +318,15 @@ class BaselineLive:
             #recomendedDirection = self.segmented2Direction.getDirectionOfImage(drivableIndex, vis_panoptic, fileName, combinedTaller[:,:,2], rgb_img, drivableColor, useDepth=True, lat=rosX, long=rosY, heading=xrotationEtter)
             #print(recomendedDirection)
 
-            recomendedDirection = self.segmented2Direction.getDirectionOfImage(drivableIndex, vis_panoptic, fileName, depthImage, rgb_img, drivableColor, useDepth=useDepth, lat=rosX, long=rosY, heading=xrotationEtter)
+            recomendedDirection, globalDirection = self.segmented2Direction.getDirectionOfImage(drivableIndex, vis_panoptic, fileName, depthImage, rgb_img, drivableColor, useDepth=useDepth, lat=rosX, long=rosY, heading=xrotationEtter)
             print(recomendedDirection)
 
             #send twist            
             twist = Twist()
             twist.linear.x = 1 #constant low speed for testing
-            twist.angular.z = -math.radians(recomendedDirection) # mabye change to negative for counter clockwise
+          # twist.angular.z = -math.radians(recomendedDirection)
+            twist.angular.z = math.radians(globalDirection)
+             # mabye change to negative for counter clockwise
             self.pub_twist.publish(twist)
 
             rgb_img = rgb_img.astype('uint8')

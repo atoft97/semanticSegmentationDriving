@@ -88,14 +88,14 @@ class Segmented2DirectionLocal:
         #print(directionChange)
         
         if (self.typeOfImage == "lidar"):
-            numberOfChecks = 359
+            numberOfChecks = 60
             fov = 360
-            width = int(imageSize[1]/ 10)
+            width = int(imageSize[1]/ 5)
         elif (self.typeOfImage == "rgb"):
             #numberOfChecks = 31
             numberOfChecks = 7
             fov = 60
-            width = int(imageSize[1]/ 4)
+            width = int(imageSize[1]/ 3)
         #antar at kjøretøyet er flatt, tar ikkje hensyn til at pixeler høyt kan være nært i en snart oppoverbakke
         if (useDepth):
             hight = 0, imageSize[0]
